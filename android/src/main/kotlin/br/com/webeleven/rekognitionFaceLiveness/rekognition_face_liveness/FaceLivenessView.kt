@@ -22,26 +22,43 @@ internal class FaceLivenessView(context: Context, id: Int, creationParams: Map<S
     override fun dispose() {}
 
     init {
+        // Lets TalkBack announce something meaningful for this region
+        // instead of leaving it unlabeled; overridable from Dart via
+        // `FaceLivenessDetector.semanticLabel`.
+        composeView.contentDescription =
+            creationParams?.get("semanticLabel") as? String ?: "Face verification camera"
+    }
+
+    /// Reads an optional ARGB32 color sent from Dart (`Color.toARGB32()`).
+    /// The platform channel may deliver it as an Int or a Long depending on
+    /// the value's magnitude, so this accepts any `Number`. Falls back to
+    /// [default] when the key is absent, letting a host app override only
+    /// the colors it cares about.
+    private fun colorParam(creationParams: Map<String?, Any?>?, key: String, default: Color): Color {
+        val raw = creationParams?.get(key) as? Number ?: return default
+        return Color(raw.toLong().toInt())
+    }
+
+    init {
         try {
+            // Default to the stock AWS orange theme; a host app overrides
+            // any subset of these via `FaceLivenessTheme` on the Dart side.
+            val colorScheme = lightColorScheme(
+                primary = colorParam(creationParams, "primaryColor", Color(0xFFFFA500)),
+                onPrimary = colorParam(creationParams, "onPrimaryColor", Color.White),
+                background = colorParam(creationParams, "backgroundColor", Color.White),
+                onBackground = colorParam(creationParams, "onBackgroundColor", Color(0xFF0D1926)),
+                surface = colorParam(creationParams, "surfaceColor", Color.White),
+                onSurface = colorParam(creationParams, "onSurfaceColor", Color(0xFF0D1926)),
+                error = colorParam(creationParams, "errorColor", Color(0xFF950404)),
+                onError = colorParam(creationParams, "onErrorColor", Color.White),
+                errorContainer = colorParam(creationParams, "errorContainerColor", Color(0xFFB8CEF9)),
+                onErrorContainer = colorParam(creationParams, "onErrorContainerColor", Color(0xFF002266))
+            )
+
             // Set up the composable view
             composeView.setContent {
-                MaterialTheme(
-                    // Connect Me brand palette (connect-me-mobileapp's
-                    // AppColors.primary/primaryDark/black) instead of the
-                    // plugin's default AWS orange theme.
-                    colorScheme = lightColorScheme(
-                        primary = Color(0xFFF03D3D),
-                        onPrimary = Color.White,
-                        background = Color.White,
-                        onBackground = Color(0xFF0B0707),
-                        surface = Color.White,
-                        onSurface = Color(0xFF0B0707),
-                        error = Color(0xFFB3282A),
-                        onError = Color.White,
-                        errorContainer = Color(0xFFF9D6D6),
-                        onErrorContainer = Color(0xFFB3282A)
-                    )
-                ) {
+                MaterialTheme(colorScheme = colorScheme) {
                     // Get parameters from Flutter
                     val sessionId = creationParams?.get("sessionId") as? String ?: ""
                     val region = creationParams?.get("region") as? String ?: "us-east-1"

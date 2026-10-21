@@ -179,6 +179,36 @@ FaceLivenessDetector(
 )
 ```
 
+#### Theming and accessibility
+
+Pass a `FaceLivenessTheme` to brand the camera screen without forking this package, and/or
+`semanticLabel` to customize what screen readers announce for it:
+
+```dart
+FaceLivenessDetector(
+  sessionId: sessionId,
+  region: 'us-east-1',
+  onComplete: () { /* ... */ },
+  onError: (errorCode) { /* ... */ },
+  semanticLabel: 'Face verification camera',
+  theme: const FaceLivenessTheme(
+    primaryColor: Color(0xFFF03D3D),
+    onPrimaryColor: Colors.white,
+    backgroundColor: Colors.white,
+    onBackgroundColor: Color(0xFF0B0707),
+    errorColor: Color(0xFFB3282A),
+  ),
+)
+```
+
+Every `FaceLivenessTheme` field is optional — anything left unset keeps the native view's own
+default. On **Android** this maps directly onto a Material3 `ColorScheme` (`primary`, `surface`,
+`error`, etc.), so all ten fields take effect. On **iOS**, Amplify's `FaceLivenessDetectorView`
+has no documented color API; only `primaryColor` is applied there, as a best-effort `.tint()`
+that standard SwiftUI controls respect — it won't restyle everything the view draws itself. On
+**both platforms**, the color-cycling liveness challenge sequence itself is never themeable, by
+AWS's own design (it's a security signal, not decoration).
+
 ### 4. Fetch Liveness Results
 
 After the liveness check is complete, you should verify the results with your backend:

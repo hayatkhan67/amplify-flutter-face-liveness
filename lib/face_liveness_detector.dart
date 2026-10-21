@@ -3,6 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'face_liveness_theme.dart';
+
+export 'face_liveness_theme.dart';
+
 /// A Flutter widget that provides AWS Rekognition Face Liveness detection functionality.
 ///
 /// This widget requires a valid AWS Rekognition Face Liveness session ID and region.
@@ -21,18 +25,36 @@ class FaceLivenessDetector extends StatefulWidget {
   /// The error code is passed as a parameter.
   final ValueChanged<String>? onError;
 
+  /// Optional color overrides for the native camera screen, so the host app
+  /// can brand it without forking this plugin. See [FaceLivenessTheme].
+  /// Applied on Android via a Material3 `ColorScheme`. On iOS, Amplify's
+  /// `FaceLivenessDetectorView` has no official color API, so only
+  /// [FaceLivenessTheme.primaryColor] is applied there, as a best-effort
+  /// `.tint()` — the color-cycling liveness challenge itself is never
+  /// themeable on either platform, by AWS design (it's a security signal,
+  /// not decoration).
+  final FaceLivenessTheme? theme;
+
+  /// Accessibility label announced by screen readers (TalkBack/VoiceOver)
+  /// for this view. Defaults to a generic description if omitted.
+  final String? semanticLabel;
+
   /// Creates a Face Liveness detector widget.
   ///
   /// [sessionId] is required and must be a valid AWS Rekognition Face Liveness session ID.
   /// [region] is required and must be a valid AWS region where the session was created.
   /// [onComplete] is called when the face liveness check is completed successfully.
   /// [onError] is called when an error occurs during the face liveness check.
+  /// [theme] optionally overrides the native camera screen's colors.
+  /// [semanticLabel] optionally overrides the screen-reader label.
   const FaceLivenessDetector({
     super.key,
     required this.sessionId,
     required this.region,
     this.onComplete,
     this.onError,
+    this.theme,
+    this.semanticLabel,
   });
 
   @override
@@ -54,27 +76,36 @@ class _FaceLivenessDetectorState extends State<FaceLivenessDetector> {
     });
   }
 
+  Map<String, dynamic> _buildCreationParams() => {
+    'sessionId': widget.sessionId,
+    'region': widget.region,
+    if (widget.semanticLabel != null) 'semanticLabel': widget.semanticLabel,
+    ...?widget.theme?.toCreationParams(),
+  };
+
   @override
   Widget build(BuildContext context) {
-    if (Platform.isIOS) {
-      return UiKitView(
-        viewType: 'face_liveness_view',
-        layoutDirection: TextDirection.ltr,
-        creationParams: {
-          'sessionId': widget.sessionId,
-          'region': widget.region,
-        },
-        creationParamsCodec: const StandardMessageCodec(),
-      );
-    }
-    return AndroidView(
-      viewType: 'face_liveness_view',
-      layoutDirection: TextDirection.ltr,
-      creationParams: {
-        'sessionId': widget.sessionId,
-        'region': widget.region,
-      },
-      creationParamsCodec: const StandardMessageCodec(),
+    final platformView = Platform.isIOS
+        ? UiKitView(
+            viewType: 'face_liveness_view',
+            layoutDirection: TextDirection.ltr,
+            creationParams: _buildCreationParams(),
+            creationParamsCodec: const StandardMessageCodec(),
+          )
+        : AndroidView(
+            viewType: 'face_liveness_view',
+            layoutDirection: TextDirection.ltr,
+            creationParams: _buildCreationParams(),
+            creationParamsCodec: const StandardMessageCodec(),
+          );
+
+    // The platform view hosts native UI Flutter can't introspect, so give
+    // assistive technologies an explicit label instead of leaving this
+    // region unlabeled.
+    return Semantics(
+      container: true,
+      label: widget.semanticLabel ?? 'Face verification camera',
+      child: platformView,
     );
   }
 }

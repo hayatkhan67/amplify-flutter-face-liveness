@@ -1,3 +1,12 @@
+## Unreleased (connect-me-theme fork)
+
+* Added `FaceLivenessTheme` for full Android Material3 `ColorScheme` customization (primary,
+  background, surface, error colors and their "on" counterparts), and a best-effort `.tint()`
+  override on iOS, passed through `FaceLivenessDetector(theme: ...)`.
+* Added `FaceLivenessDetector(semanticLabel: ...)` plus a `Semantics` wrapper (Flutter) and
+  native accessibility labels (Android `contentDescription`, iOS `.accessibilityLabel`) so
+  screen readers announce something meaningful for this view.
+
 ## 0.2.11
 
 * amplify upgrade 
