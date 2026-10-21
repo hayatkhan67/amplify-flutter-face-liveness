@@ -26,17 +26,20 @@ internal class FaceLivenessView(context: Context, id: Int, creationParams: Map<S
             // Set up the composable view
             composeView.setContent {
                 MaterialTheme(
+                    // Connect Me brand palette (connect-me-mobileapp's
+                    // AppColors.primary/primaryDark/black) instead of the
+                    // plugin's default AWS orange theme.
                     colorScheme = lightColorScheme(
-                        primary = Color(0xFFFFA500),
+                        primary = Color(0xFFF03D3D),
                         onPrimary = Color.White,
                         background = Color.White,
-                        onBackground = Color(0xFF0D1926),
+                        onBackground = Color(0xFF0B0707),
                         surface = Color.White,
-                        onSurface = Color(0xFF0D1926),
-                        error = Color(0xFF950404),
+                        onSurface = Color(0xFF0B0707),
+                        error = Color(0xFFB3282A),
                         onError = Color.White,
-                        errorContainer = Color(0xFFB8CEF9),
-                        onErrorContainer = Color(0xFF002266)
+                        errorContainer = Color(0xFFF9D6D6),
+                        onErrorContainer = Color(0xFFB3282A)
                     )
                 ) {
                     // Get parameters from Flutter
