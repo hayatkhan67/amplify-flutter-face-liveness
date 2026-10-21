@@ -6,6 +6,11 @@
 * Added `FaceLivenessDetector(semanticLabel: ...)` plus a `Semantics` wrapper (Flutter) and
   native accessibility labels (Android `contentDescription`, iOS `.accessibilityLabel`) so
   screen readers announce something meaningful for this view.
+* Added `FaceLivenessDetector(disableStartView: ...)`, exposing the underlying Amplify
+  `disableStartView` option on both platforms — skips AWS's own instructions/photosensitivity
+  screen for apps that show an equivalent explainer themselves. Does not affect the actual
+  liveness capture (oval framing, color-cycling challenge), which AWS never exposes for
+  customization.
 
 ## 0.2.11
 

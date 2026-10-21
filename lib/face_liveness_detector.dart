@@ -39,6 +39,13 @@ class FaceLivenessDetector extends StatefulWidget {
   /// for this view. Defaults to a generic description if omitted.
   final String? semanticLabel;
 
+  /// Skips AWS's own instructions/photosensitivity-warning start screen —
+  /// use this when your app already shows an equivalent explainer before
+  /// mounting this widget. Supported on both Android and iOS. The actual
+  /// liveness capture (oval framing, color-cycling challenge) that follows
+  /// is unaffected either way — AWS doesn't expose that for customization.
+  final bool disableStartView;
+
   /// Creates a Face Liveness detector widget.
   ///
   /// [sessionId] is required and must be a valid AWS Rekognition Face Liveness session ID.
@@ -47,6 +54,7 @@ class FaceLivenessDetector extends StatefulWidget {
   /// [onError] is called when an error occurs during the face liveness check.
   /// [theme] optionally overrides the native camera screen's colors.
   /// [semanticLabel] optionally overrides the screen-reader label.
+  /// [disableStartView] skips AWS's own instructions screen.
   const FaceLivenessDetector({
     super.key,
     required this.sessionId,
@@ -55,6 +63,7 @@ class FaceLivenessDetector extends StatefulWidget {
     this.onError,
     this.theme,
     this.semanticLabel,
+    this.disableStartView = false,
   });
 
   @override
@@ -79,6 +88,7 @@ class _FaceLivenessDetectorState extends State<FaceLivenessDetector> {
   Map<String, dynamic> _buildCreationParams() => {
     'sessionId': widget.sessionId,
     'region': widget.region,
+    'disableStartView': widget.disableStartView,
     if (widget.semanticLabel != null) 'semanticLabel': widget.semanticLabel,
     ...?widget.theme?.toCreationParams(),
   };

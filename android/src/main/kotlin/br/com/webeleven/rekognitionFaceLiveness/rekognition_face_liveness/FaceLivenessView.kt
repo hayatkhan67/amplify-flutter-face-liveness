@@ -62,13 +62,19 @@ internal class FaceLivenessView(context: Context, id: Int, creationParams: Map<S
                     // Get parameters from Flutter
                     val sessionId = creationParams?.get("sessionId") as? String ?: ""
                     val region = creationParams?.get("region") as? String ?: "us-east-1"
-                    
-                    Log.d(TAG, "Initializing FaceLivenessDetector with sessionId=$sessionId, region=$region")
-                    
+                    // Skip AWS's own instructions/photosensitivity-warning
+                    // screen when the host app already showed its own
+                    // equivalent — see `FaceLivenessDetector(disableStartView:)`
+                    // on the Dart side.
+                    val disableStartView = creationParams?.get("disableStartView") as? Boolean ?: false
+
+                    Log.d(TAG, "Initializing FaceLivenessDetector with sessionId=$sessionId, region=$region, disableStartView=$disableStartView")
+
                     // Use default Amplify authentication and credentials provider
                     FaceLivenessDetector(
                         sessionId = sessionId,
                         region = region,
+                        disableStartView = disableStartView,
                         onComplete = {
                             Log.d(TAG, "FaceLivenessDetector completed successfully")
                             handler.onComplete()

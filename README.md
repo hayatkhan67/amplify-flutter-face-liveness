@@ -198,8 +198,16 @@ FaceLivenessDetector(
     onBackgroundColor: Color(0xFF0B0707),
     errorColor: Color(0xFFB3282A),
   ),
+  // Skip AWS's own instructions/photosensitivity screen — use this when
+  // your app already shows an equivalent explainer before mounting this
+  // widget. Supported on Android and iOS.
+  disableStartView: true,
 )
 ```
+
+`disableStartView` does **not** change the actual liveness capture (oval framing, color-cycling
+challenge) that follows — AWS doesn't expose that part for customization on either platform. It
+only skips the preceding instructions screen.
 
 Every `FaceLivenessTheme` field is optional — anything left unset keeps the native view's own
 default. On **Android** this maps directly onto a Material3 `ColorScheme` (`primary`, `surface`,

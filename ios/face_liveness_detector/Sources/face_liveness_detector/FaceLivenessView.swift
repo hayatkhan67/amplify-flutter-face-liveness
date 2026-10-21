@@ -35,6 +35,7 @@ class FaceLivenessView: NSObject, FlutterPlatformView {
                 region: args["region"] as! String,
                 primaryColor: Color(argb: args["primaryColor"]),
                 semanticLabel: args["semanticLabel"] as? String,
+                disableStartView: args["disableStartView"] as? Bool ?? false,
                 handler: handler
             )
         )
@@ -62,15 +63,17 @@ struct NativeView: View {
     let region: String
     let primaryColor: Color?
     let semanticLabel: String?
+    let disableStartView: Bool
     let handler: EventStreamHadler
 
     @State private var isPresentingLiveness = true
 
-    init(sessionId: String, region: String, primaryColor: Color?, semanticLabel: String?, handler: EventStreamHadler) {
+    init(sessionId: String, region: String, primaryColor: Color?, semanticLabel: String?, disableStartView: Bool, handler: EventStreamHadler) {
         self.sessionId = sessionId
         self.region = region
         self.primaryColor = primaryColor
         self.semanticLabel = semanticLabel
+        self.disableStartView = disableStartView
         self.handler = handler
     }
 
@@ -81,10 +84,13 @@ struct NativeView: View {
         // standard SwiftUI controls respect; it won't restyle anything the
         // view draws itself, and the color-cycling liveness challenge is
         // never themeable by AWS design regardless of platform.
+        // `disableStartView` skips AWS's own instructions/photosensitivity
+        // screen when the host app already showed an equivalent one.
         FaceLivenessDetectorView(
             sessionID: self.sessionId,
             region: self.region,
             isPresented: $isPresentingLiveness,
+            disableStartView: self.disableStartView,
             onCompletion: { result in
                 switch result {
                 case .success:
